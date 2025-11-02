@@ -172,17 +172,35 @@ function App() {
                   disabled={!stage.enabled}
                 />
 
-                {/* Duration Input */}
-                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
-                  <input
-                    type="number"
-                    value={stage.duration}
-                    onChange={(e) => updateStageDuration(stage.id, e.target.value)}
-                    className="w-12 text-sm text-center bg-transparent border-0 focus:outline-none focus:ring-0"
-                    min="0"
-                    disabled={!stage.enabled}
-                  />
-                  <span className="text-xs text-gray-500">min</span>
+                {/* Duration Input and Preset Buttons */}
+                <div className="flex items-center gap-1">
+                  {/* Preset Time Buttons */}
+                  {stage.enabled && (
+                    <div className="flex gap-1">
+                      {[30, 60, 90].map((minutes) => (
+                        <button
+                          key={minutes}
+                          onClick={() => updateStageDuration(stage.id, minutes)}
+                          className="px-2 py-1 text-xs text-gray-600 bg-white border border-gray-200 rounded hover:bg-gray-100 hover:border-gray-300 transition-colors"
+                          title={`Set to ${minutes} minutes`}
+                        >
+                          {minutes}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
+                    <input
+                      type="number"
+                      value={stage.duration}
+                      onChange={(e) => updateStageDuration(stage.id, e.target.value)}
+                      className="w-12 text-sm text-center bg-transparent border-0 focus:outline-none focus:ring-0"
+                      min="0"
+                      disabled={!stage.enabled}
+                    />
+                    <span className="text-xs text-gray-500">min</span>
+                  </div>
                 </div>
 
                 {/* Reorder Buttons */}

@@ -17,7 +17,7 @@ describe('App', () => {
 
   it('displays default stages', () => {
     render(<App />)
-    expect(screen.getByDisplayValue('Walking to Station')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Getting to the Station')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Getting Ready')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Working Out')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Waking Up')).toBeInTheDocument()
@@ -52,7 +52,7 @@ describe('App', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    // Find the first duration input (Walking to Station - 20 minutes)
+    // Find the first duration input (Getting to the Station - 20 minutes)
     const durationInputs = screen.getAllByRole('spinbutton')
     const firstDuration = durationInputs[0]
 
@@ -67,7 +67,7 @@ describe('App', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    // Find all checkboxes and uncheck the first one (Walking to Station - 20 min)
+    // Find all checkboxes and uncheck the first one (Getting to the Station - 20 min)
     const checkboxes = screen.getAllByRole('checkbox')
     const firstCheckbox = checkboxes[0]
 

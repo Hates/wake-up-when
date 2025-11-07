@@ -6,7 +6,7 @@ import App from './App'
 describe('App', () => {
   it('renders the app title', () => {
     render(<App />)
-    expect(screen.getByText('Wake up When')).toBeInTheDocument()
+    expect(screen.getByAltText('Wake up When')).toBeInTheDocument()
   })
 
   it('displays the default train time', () => {
@@ -20,7 +20,7 @@ describe('App', () => {
     expect(screen.getByDisplayValue('Walking to Station')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Getting Ready')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Working Out')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Waking up')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Waking Up')).toBeInTheDocument()
   })
 
   it('calculates and displays wake-up time', () => {

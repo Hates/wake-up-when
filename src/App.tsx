@@ -1,56 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
+import type { Stage } from './utils/timeCalculations'
+import { calculateWakeUpTime, calculateTotalMinutes } from './utils/timeCalculations'
+import { useLocalStorage } from './hooks/useLocalStorage'
+
+const DEFAULT_STAGES: Stage[] = [
+  { id: 4, name: 'Waking Up', duration: 20, enabled: true },
+  { id: 3, name: 'Working Out', duration: 60, enabled: true },
+  { id: 2, name: 'Getting Ready', duration: 55, enabled: true },
+  { id: 1, name: 'Walking to Station', duration: 20, enabled: true },
+]
 
 function App() {
-  const [trainTime, setTrainTime] = useState('08:50')
-  const [stages, setStages] = useState([
-    { id: 4, name: 'Waking Up', duration: 20, enabled: true },
-    { id: 3, name: 'Working Out', duration: 60, enabled: true },
-    { id: 2, name: 'Getting Ready', duration: 55, enabled: true },
-    { id: 1, name: 'Walking to Station', duration: 20, enabled: true },
-  ])
-  const [newStageName, setNewStageName] = useState('')
-  const [wakeUpTime, setWakeUpTime] = useState('')
-  const [draggedIndex, setDraggedIndex] = useState(null)
-  const [dragOverIndex, setDragOverIndex] = useState(null)
+  const [trainTime, setTrainTime] = useLocalStorage<string>('trainTime', '08:50')
+  const [stages, setStages] = useLocalStorage<Stage[]>('stages', DEFAULT_STAGES)
+  const [newStageName, setNewStageName] = useState<string>('')
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
-  // Calculate wake-up time whenever train time or stages change
-  useEffect(() => {
-    calculateWakeUpTime()
-  }, [trainTime, stages])
+  // Calculate wake-up time as derived state
+  const wakeUpTime = useMemo(() => calculateWakeUpTime(trainTime, stages), [trainTime, stages])
 
-  const calculateWakeUpTime = () => {
-    if (!trainTime) {
-      setWakeUpTime('')
-      return
-    }
-
-    // Parse train time
-    const [hours, minutes] = trainTime.split(':').map(Number)
-    let totalMinutes = hours * 60 + minutes
-
-    // Subtract all enabled stage durations
-    const totalStageMinutes = stages
-      .filter(stage => stage.enabled)
-      .reduce((sum, stage) => sum + (parseInt(stage.duration) || 0), 0)
-
-    totalMinutes -= totalStageMinutes
-
-    // Handle negative time (previous day)
-    if (totalMinutes < 0) {
-      totalMinutes += 24 * 60
-    }
-
-    // Convert back to hours and minutes
-    const wakeHours = Math.floor(totalMinutes / 60)
-    const wakeMinutes = totalMinutes % 60
-
-    setWakeUpTime(`${String(wakeHours).padStart(2, '0')}:${String(wakeMinutes).padStart(2, '0')}`)
-  }
+  // Calculate total minutes as derived state
+  const totalEnabledMinutes = useMemo(() => calculateTotalMinutes(stages), [stages])
 
   const addStage = () => {
     if (!newStageName.trim()) return
 
-    const newStage = {
+    const newStage: Stage = {
       id: Date.now(),
       name: newStageName,
       duration: 15,
@@ -61,33 +37,34 @@ function App() {
     setNewStageName('')
   }
 
-  const removeStage = (id) => {
+  const removeStage = (id: number) => {
     setStages(stages.filter(stage => stage.id !== id))
   }
 
-  const toggleStage = (id) => {
+  const toggleStage = (id: number) => {
     setStages(stages.map(stage =>
       stage.id === id ? { ...stage, enabled: !stage.enabled } : stage
     ))
   }
 
-  const updateStageDuration = (id, duration) => {
+  const updateStageDuration = (id: number, duration: string | number) => {
+    const parsedDuration = typeof duration === 'number' ? duration : parseInt(duration, 10)
     setStages(stages.map(stage =>
-      stage.id === id ? { ...stage, duration: parseInt(duration) || 0 } : stage
+      stage.id === id ? { ...stage, duration: isNaN(parsedDuration) ? 0 : parsedDuration } : stage
     ))
   }
 
-  const updateStageName = (id, name) => {
+  const updateStageName = (id: number, name: string) => {
     setStages(stages.map(stage =>
       stage.id === id ? { ...stage, name } : stage
     ))
   }
 
-  const handleDragStart = (index) => {
+  const handleDragStart = (index: number) => {
     setDraggedIndex(index)
   }
 
-  const handleDragOver = (e, index) => {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault()
     setDragOverIndex(index)
   }
@@ -96,7 +73,7 @@ function App() {
     setDragOverIndex(null)
   }
 
-  const handleDrop = (e, dropIndex) => {
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
 
     if (draggedIndex === null || draggedIndex === dropIndex) {
@@ -107,6 +84,13 @@ function App() {
 
     const newStages = [...stages]
     const draggedStage = newStages[draggedIndex]
+
+    // Ensure draggedStage exists
+    if (!draggedStage) {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+      return
+    }
 
     // Remove from old position
     newStages.splice(draggedIndex, 1)
@@ -123,10 +107,6 @@ function App() {
     setDragOverIndex(null)
   }
 
-  const totalEnabledMinutes = stages
-    .filter(stage => stage.enabled)
-    .reduce((sum, stage) => sum + (parseInt(stage.duration) || 0), 0)
-
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center">
       {/* Two Column Layout */}
@@ -135,7 +115,7 @@ function App() {
         <aside className="md:w-1/3 lg:w-1/4 p-6 md:p-8 flex items-start justify-center md:sticky md:top-0 md:h-screen">
           <div className="text-center">
             <img src="/logo.png" alt="Wake up When" className="mx-auto mt-4 mb-4" />
-            <p className="text-sm text-gray-500">Calculate your wake-up time</p>
+            <p className="text-sm text-gray-500">Calculate what time you need to wake up to make your train</p>
           </div>
         </aside>
 
@@ -162,7 +142,7 @@ function App() {
           <input
             type="time"
             value={trainTime}
-            onChange={(e) => setTrainTime(e.target.value)}
+            onChange={(e) => { setTrainTime(e.target.value); }}
             className="w-full px-4 py-3 text-xl font-light text-center border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow"
           />
         </div>
@@ -176,10 +156,10 @@ function App() {
               <div
                 key={stage.id}
                 draggable
-                onDragStart={() => handleDragStart(index)}
-                onDragOver={(e) => handleDragOver(e, index)}
+                onDragStart={() => { handleDragStart(index); }}
+                onDragOver={(e) => { handleDragOver(e, index); }}
                 onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, index)}
+                onDrop={(e) => { handleDrop(e, index); }}
                 onDragEnd={handleDragEnd}
                 className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-move ${
                   stage.enabled
@@ -207,7 +187,7 @@ function App() {
                 <input
                   type="checkbox"
                   checked={stage.enabled}
-                  onChange={() => toggleStage(stage.id)}
+                  onChange={() => { toggleStage(stage.id); }}
                   className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900 cursor-pointer"
                 />
 
@@ -215,7 +195,7 @@ function App() {
                 <input
                   type="text"
                   value={stage.name}
-                  onChange={(e) => updateStageName(stage.id, e.target.value)}
+                  onChange={(e) => { updateStageName(stage.id, e.target.value); }}
                   className="flex-1 px-3 py-2 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 placeholder-gray-400"
                   disabled={!stage.enabled}
                 />
@@ -228,9 +208,9 @@ function App() {
                       {[20, 40, 60].map((minutes) => (
                         <button
                           key={minutes}
-                          onClick={() => updateStageDuration(stage.id, minutes)}
+                          onClick={() => { updateStageDuration(stage.id, minutes); }}
                           className="px-2 py-1 text-xs text-gray-600 bg-white border border-gray-200 rounded hover:bg-gray-100 hover:border-gray-300 transition-colors"
-                          title={`Set to ${minutes} minutes`}
+                          title={`Set to ${String(minutes)} minutes`}
                         >
                           {minutes}
                         </button>
@@ -242,7 +222,7 @@ function App() {
                     <input
                       type="number"
                       value={stage.duration}
-                      onChange={(e) => updateStageDuration(stage.id, e.target.value)}
+                      onChange={(e) => { updateStageDuration(stage.id, e.target.value); }}
                       className="w-12 text-sm text-center bg-transparent border-0 focus:outline-none focus:ring-0"
                       min="0"
                       disabled={!stage.enabled}
@@ -253,7 +233,7 @@ function App() {
 
                 {/* Remove Button */}
                 <button
-                  onClick={() => removeStage(stage.id)}
+                  onClick={() => { removeStage(stage.id); }}
                   className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Remove stage"
                 >
@@ -271,8 +251,12 @@ function App() {
               <input
                 type="text"
                 value={newStageName}
-                onChange={(e) => setNewStageName(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addStage()}
+                onChange={(e) => { setNewStageName(e.target.value); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    addStage();
+                  }
+                }}
                 placeholder="Add a new stage..."
                 className="flex-1 px-4 py-2 text-sm bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 placeholder-gray-400"
               />

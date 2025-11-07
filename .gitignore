@@ -8,6 +8,7 @@ node_modules
 package-lock.json
 
 # Build output
+deploy.sh
 dist
 dist-ssr
 build

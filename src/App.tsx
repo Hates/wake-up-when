@@ -14,8 +14,6 @@ function App() {
   const [trainTime, setTrainTime] = useLocalStorage<string>('trainTime', '08:50')
   const [stages, setStages] = useLocalStorage<Stage[]>('stages', DEFAULT_STAGES)
   const [newStageName, setNewStageName] = useState<string>('')
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   // Calculate wake-up time as derived state
   const wakeUpTime = useMemo(() => calculateWakeUpTime(trainTime, stages), [trainTime, stages])
@@ -60,53 +58,6 @@ function App() {
     ))
   }
 
-  const handleDragStart = (index: number) => {
-    setDraggedIndex(index)
-  }
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault()
-    setDragOverIndex(index)
-  }
-
-  const handleDragLeave = () => {
-    setDragOverIndex(null)
-  }
-
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault()
-
-    if (draggedIndex === null || draggedIndex === dropIndex) {
-      setDraggedIndex(null)
-      setDragOverIndex(null)
-      return
-    }
-
-    const newStages = [...stages]
-    const draggedStage = newStages[draggedIndex]
-
-    // Ensure draggedStage exists
-    if (!draggedStage) {
-      setDraggedIndex(null)
-      setDragOverIndex(null)
-      return
-    }
-
-    // Remove from old position
-    newStages.splice(draggedIndex, 1)
-    // Insert at new position
-    newStages.splice(dropIndex, 0, draggedStage)
-
-    setStages(newStages)
-    setDraggedIndex(null)
-    setDragOverIndex(null)
-  }
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null)
-    setDragOverIndex(null)
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center">
       {/* Two Column Layout */}
@@ -135,7 +86,7 @@ function App() {
         </div>
 
         {/* Train Time Input */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-3">
             Train Departure Time
           </label>
@@ -143,7 +94,7 @@ function App() {
             type="time"
             value={trainTime}
             onChange={(e) => { setTrainTime(e.target.value); }}
-            className="w-full px-4 py-3 text-xl font-light text-center border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow"
+            className="w-full text-lg sm:text-xl font-light text-center bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-gray-900 transition-colors rounded-none px-1 py-2"
           />
         </div>
 
@@ -152,37 +103,15 @@ function App() {
           <h3 className="text-sm font-medium text-gray-700 mb-4">Morning Stages</h3>
 
           <div className="space-y-2">
-            {stages.map((stage, index) => (
+            {stages.map((stage) => (
               <div
                 key={stage.id}
-                draggable
-                onDragStart={() => { handleDragStart(index); }}
-                onDragOver={(e) => { handleDragOver(e, index); }}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => { handleDrop(e, index); }}
-                onDragEnd={handleDragEnd}
-                className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-move ${
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
                   stage.enabled
                     ? 'bg-gray-50'
                     : 'bg-white opacity-50'
-                } ${
-                  draggedIndex === index ? 'opacity-50 scale-95' : ''
-                } ${
-                  dragOverIndex === index && draggedIndex !== index ? 'ring-2 ring-gray-900' : ''
                 }`}
               >
-                {/* Drag Handle */}
-                <div className="text-gray-400 cursor-move" title="Drag to reorder">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
-                    <circle cx="4" cy="4" r="1.5"/>
-                    <circle cx="4" cy="8" r="1.5"/>
-                    <circle cx="4" cy="12" r="1.5"/>
-                    <circle cx="8" cy="4" r="1.5"/>
-                    <circle cx="8" cy="8" r="1.5"/>
-                    <circle cx="8" cy="12" r="1.5"/>
-                  </svg>
-                </div>
-
                 {/* Enable/Disable Toggle */}
                 <input
                   type="checkbox"

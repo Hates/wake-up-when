@@ -86,7 +86,7 @@ function App() {
         </div>
 
         {/* Train Time Input */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 mb-6 text-center">
           <label className="block text-sm font-medium text-gray-700 mb-3">
             Train Departure Time
           </label>
@@ -94,7 +94,7 @@ function App() {
             type="time"
             value={trainTime}
             onChange={(e) => { setTrainTime(e.target.value); }}
-            className="w-full text-lg sm:text-xl font-light text-center bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-gray-900 transition-colors rounded-none px-1 py-2"
+            className="w-[80%] text-lg sm:text-xl font-light text-center bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-gray-900 transition-colors rounded-none px-2 py-2"
           />
         </div>
 
@@ -121,7 +121,6 @@ function App() {
                 />
 
                 {/* Duration Input */}
-                <div className="flex items-center gap-1">
                   <input
                     type="number"
                     value={stage.duration}
@@ -131,7 +130,6 @@ function App() {
                     disabled={!stage.enabled}
                   />
                   <span className="text-sm text-gray-600">min</span>
-                </div>
 
                 {/* Stage Name */}
                 <input
@@ -145,7 +143,7 @@ function App() {
                 {/* Remove Button */}
                 <button
                   onClick={() => { removeStage(stage.id); }}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="w-3 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Remove stage"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

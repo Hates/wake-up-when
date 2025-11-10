@@ -3,6 +3,19 @@ import type { Stage } from './utils/timeCalculations'
 import { calculateWakeUpTime, calculateTotalMinutes } from './utils/timeCalculations'
 import { useLocalStorage } from './hooks/useLocalStorage'
 
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+
 const DEFAULT_STAGES: Stage[] = [
   { id: 4, name: 'Waking Up', duration: 20, enabled: true },
   { id: 3, name: 'Working Out', duration: 60, enabled: true },
@@ -60,64 +73,62 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center">
-      {/* Two Column Layout */}
-      <div className="flex flex-col md:flex-row min-h-screen max-w-7xl w-full">
-        {/* Left Column - Logo */}
-        <aside className="md:w-1/3 lg:w-1/4 p-6 md:p-8 flex items-start justify-center md:sticky md:top-0 md:h-screen">
-          <div className="text-center">
-            <img src="/logo.png" alt="Wake up When" className="mx-auto mt-4 mb-4" />
+        <main>
+
+          <div className="text-center mb-4">
+            <img src="/logo.png" alt="Wake up When" className="mx-auto mt-4 mb-4 h-24" />
             <p className="text-sm text-gray-500">Calculate what time you need to wake up to make your train</p>
           </div>
-        </aside>
 
-        {/* Right Column - Main Content */}
-        <main className="flex-1 px-4 py-4 sm:px-6 sm:py-12 md:px-8 max-w-4xl">
-        {/* Wake-up Time Display */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 mb-6">
-          <div className="text-center">
-            <p className="text-sm uppercase tracking-wide text-gray-500 mb-3">Wake up at</p>
-            <div className="text-7xl font-light text-gray-900 mb-4 tracking-tight">
-              {wakeUpTime || '--:--'}
-            </div>
-            <p className="text-sm text-gray-600">
-              {totalEnabledMinutes} minutes total
-            </p>
-          </div>
-        </div>
+          {/* Wake-up Time Display */}
+          <Card className="mb-4">
+            <CardContent>
+              <div className="pt-8 text-center">
+                <p className="text-sm uppercase tracking-wide text-gray-500 mb-3">Wake up at</p>
+                <div className="text-7xl font-light text-gray-900 mb-4 tracking-tight">
+                  {wakeUpTime || '--:--'}
+                </div>
+                <p className="text-sm text-gray-600">
+                  {totalEnabledMinutes} minutes total
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Train Time Input */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 mb-6 text-center">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Train Departure Time
-          </label>
-          <input
-            type="time"
-            value={trainTime}
-            onChange={(e) => { setTrainTime(e.target.value); }}
-            className="w-[80%] text-lg sm:text-xl font-light text-center bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-gray-900 transition-colors rounded-none px-2 py-2"
-          />
-        </div>
+          {/* Train Time Input */}
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle>Train Departure Time</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Input
+                type="time"
+                value={trainTime}
+                onChange={(e) => { setTrainTime(e.target.value); }}
+                className="mx-auto w-88 px-1 py-0.5 text-sm text-center"
+              />
+            </CardContent>
+          </Card>
 
         {/* Stages List */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-4">Morning Stages</h3>
-
-          <div className="space-y-2">
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle>Morning Stages</CardTitle>
+          </CardHeader>
+          <CardContent>
             {stages.map((stage) => (
               <div
                 key={stage.id}
-                className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                className={`flex items-center gap-3 p-2 mb-2 rounded-xl transition-all ${
                   stage.enabled
                     ? 'bg-gray-50'
                     : 'bg-white opacity-50'
                 }`}
               >
                 {/* Enable/Disable Toggle */}
-                <input
-                  type="checkbox"
-                  checked={stage.enabled}
-                  onChange={() => { toggleStage(stage.id); }}
-                  className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900 cursor-pointer"
+                <Checkbox
+                  defaultChecked={stage.enabled}
+                  onCheckedChange={() => { toggleStage(stage.id); }}
                 />
 
                 {/* Duration Input */}
@@ -125,7 +136,7 @@ function App() {
                     type="number"
                     value={stage.duration}
                     onChange={(e) => { updateStageDuration(stage.id, e.target.value); }}
-                    className="w-12 text-sm text-center bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-gray-900 transition-colors rounded-none px-1 py-0.5"
+                    className="w-8 px-1 py-0.5 text-sm text-center bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-gray-900 transition-colors rounded-none"
                     min="0"
                     disabled={!stage.enabled}
                   />
@@ -136,14 +147,14 @@ function App() {
                   type="text"
                   value={stage.name}
                   onChange={(e) => { updateStageName(stage.id, e.target.value); }}
-                  className="flex-1 px-1 py-2 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 placeholder-gray-400"
+                  className="px-1 py-2 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 placeholder-gray-400"
                   disabled={!stage.enabled}
                 />
 
                 {/* Remove Button */}
                 <button
                   onClick={() => { removeStage(stage.id); }}
-                  className="w-3 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 shrink-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Remove stage"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,35 +163,33 @@ function App() {
                 </button>
               </div>
             ))}
-          </div>
 
-          {/* Add New Stage */}
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newStageName}
-                onChange={(e) => { setNewStageName(e.target.value); }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    addStage();
-                  }
-                }}
-                placeholder="Add a new stage..."
-                className="flex-1 px-4 py-2 text-sm bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 placeholder-gray-400"
-              />
-              <button
-                onClick={addStage}
-                className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                Add
-              </button>
+            {/* Add New Stage */}
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  value={newStageName}
+                  onChange={(e) => { setNewStageName(e.target.value); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      addStage();
+                    }
+                  }}
+                  placeholder="Add a new stage..."
+                />
+                <Button
+                  onClick={addStage}
+                >
+                  Add
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Footer */}
-        <footer className="mt-8 py-4 text-center">
+        <footer className="py-4 text-center">
           <a
             href="https://github.com/Hates/get-ready-timer"
             target="_blank"
@@ -194,7 +203,6 @@ function App() {
           </a>
         </footer>
       </main>
-      </div>
     </div>
   )
 }
